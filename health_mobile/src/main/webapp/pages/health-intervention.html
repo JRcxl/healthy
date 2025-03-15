@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0,user-scalable=no,minimal-ui">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <link rel="icon" href="../img/asset-favico.ico">
+  <title>传智健康</title>
+  <link rel="stylesheet" href="../css/page-health-index.css" />
+  <link rel="stylesheet" href="../css/page-health-login.css" />
+  <link rel="stylesheet" href="../plugins/elementui/index.css" />
+  <script src="../plugins/jquery/dist/jquery.min.js"></script>
+  <script src="../plugins/healthmobile.js"></script>
+  <script src="../plugins/vue/vue.js"></script>
+  <script src="../plugins/vue/axios-0.18.0.js"></script>
+  <script src="../plugins/elementui/index.js"></script>
+  <style>
+    .diet-form {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+    }
+    .form-section {
+      margin-bottom: 20px;
+    }
+    .el-tag {
+      margin-right: 10px;
+      margin-bottom: 5px;
+    }
+    .result-section {
+      margin-top: 20px;
+      white-space: pre-wrap;
+    }
+    .meal-list {
+      margin-bottom: 30px;
+    }
+
+    .meal-card {
+      margin-bottom: 20px;
+    }
+
+    .meal-name {
+      font-weight: bold;
+      color: #409EFF;
+    }
+
+    .meal-details p {
+      margin: 8px 0;
+      font-size: 14px;
+    }
+
+    .ingredients {
+      margin-top: 10px;
+    }
+
+    .ingredients .el-tag {
+      margin: 2px;
+    }
+
+    .warnings {
+      margin-top: 25px;
+      border-top: 1px solid #eee;
+      padding-top: 20px;
+    }
+
+    .el-alert {
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body data-spy="scroll" data-target="#myNavbar" data-offset="150">
+<div class="app" id="app">
+  <!-- 页面头部 -->
+  <div class="top-header" id="q">
+    <span class="f-left"><i class="icon-back" onclick="history.go(-1)"></i></span>
+    <span class="center">智慧医疗</span>
+    <span class="f-right"><i class="icon-more"></i></span>
+  </div>
+
+  <el-card class="diet-form">
+    <h2>饮食计划生成器</h2>
+    <el-form :model="formData" label-width="120px" :rules="rules" ref="formRef">
+      <!-- 基本信息 -->
+      <el-card class="form-section">
+        <div slot="header">基本信息</div>
+        <el-form-item label="会员ID" prop="memberId">
+          <el-input-number v-model="formData.memberId" :min="93"></el-input-number>
+        </el-form-item>
+        <el-form-item label="性别" prop="gender">
+          <el-radio-group v-model="formData.gender">
+            <el-radio label="男"></el-radio>
+            <el-radio label="女"></el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="体重 (kg)" prop="weight">
+          <el-input-number v-model="formData.weight" :min="60" :max="200" :precision="1"></el-input-number>
+        </el-form-item>
+        <el-form-item label="身高 (cm)" prop="height">
+          <el-input-number v-model="formData.height" :min="160" :max="250" :precision="1"></el-input-number>
+        </el-form-item>
+      </el-card>
+
+      <!-- 医疗信息 -->
+      <el-card class="form-section">
+        <div slot="header">医疗报告</div>
+        <el-form-item label="血糖 (mmol/L)" prop="bloodSugar">
+          <el-input-number v-model="formData.bloodSugar" :min="2" :max="30" :precision="1"></el-input-number>
+        </el-form-item>
+        <el-form-item label="血压 (mmHg)" prop="bloodPressure">
+          <el-input-number v-model="formData.bloodPressure" :min="50" :max="200" :precision="1"></el-input-number>
+        </el-form-item>
+      </el-card>
+
+      <!-- 过敏和疾病 -->
+      <el-card class="form-section">
+        <div slot="header">健康情况</div>
+        <el-form-item label="过敏源">
+          <el-tag
+                  v-for="(allergy, index) in formData.allergies"
+                  :key="index"
+                  closable
+                  @close="removeTag('allergies', index)">
+            {{ allergy }}
+          </el-tag>
+          <el-input
+                  v-model="inputAllergy"
+                  placeholder="输入过敏源后按回车"
+                  @keyup.enter.native="addTag('allergies', inputAllergy)">
+          </el-input>
+        </el-form-item>
+        <el-form-item label="病史">
+          <el-tag
+                  v-for="(disease, index) in formData.diseases"
+                  :key="index"
+                  closable
+                  @close="removeTag('diseases', index)">
+            {{ disease }}
+          </el-tag>
+          <el-input
+                  v-model="inputDisease"
+                  placeholder="输入病史后按回车"
+                  @keyup.enter.native="addTag('diseases', inputDisease)">
+          </el-input>
+        </el-form-item>
+      </el-card>
+
+      <!-- 提交按钮 -->
+      <el-form-item>
+        <el-button type="primary" @click="submitForm">生成饮食计划</el-button>
+        <el-button @click="resetForm">重置</el-button>
+      </el-form-item>
+    </el-form>
+
+</el-card>
+
+  <!-- 结果展示 -->
+  <el-card class="result-section" v-if="dietPlan">
+    <div slot="header">您的饮食推荐</div>
+
+    <!-- 推荐食谱 -->
+    <div class="meal-list">
+      <h3>推荐食谱 ({{ dietPlan.recommendedMeals.length }} 款)</h3>
+      <el-row :gutter="20">
+        <el-col :span="8" v-for="(meal, index) in dietPlan.recommendedMeals" :key="index">
+          <el-card class="meal-card">
+            <div slot="header" class="meal-name">{{ meal.recipe_name }}</div>
+            <div class="meal-details">
+              <p>🍳 热量: {{ meal.calories }} kcal</p>
+              <p>🧂 钠含量: {{ meal.sodium }}mg</p>
+              <p>💪 蛋白质: {{ meal.protein }}g</p>
+              <div class="ingredients">
+                <el-tag
+                        v-for="(ingredient, i) in meal.ingredients"
+                        :key="i"
+                        type="info"
+                        size="mini"
+                >{{ ingredient }}</el-tag>
+              </div>
+            </div>
+          </el-card>
+        </el-col>
+      </el-row>
+    </div>
+
+    <!-- 健康警告 -->
+    <div class="warnings" v-if="dietPlan.warnings.length">
+      <h3>⚠️ 特别注意</h3>
+      <el-alert
+              v-for="(warning, idx) in dietPlan.warnings"
+              :key="idx"
+              :title="warning"
+              type="warning"
+              :closable="false"
+              show-icon
+      />
+    </div>
+  </el-card>
+</div>
+
+<script>
+  new Vue({
+    el: '#app',
+    data() {
+      return {
+        formData: {
+          memberId: null,
+          gender: '',
+          weight: null,
+          height: null,
+          allergies: [],
+          diseases: [],
+          bloodSugar: null,
+          bloodPressure: null
+        },
+        inputAllergy: '',
+        inputDisease: '',
+        dietPlan: null,
+        rules: {
+          memberId: [{ required: true, message: '请输入会员ID', trigger: 'blur' }],
+          gender: [{ required: true, message: '请选择性别', trigger: 'change' }],
+          weight: [{ required: true, message: '请输入体重', trigger: 'blur' }],
+          height: [{ required: true, message: '请输入身高', trigger: 'blur' }],
+          bloodSugar: [{ required: true, message: '请输入血糖值', trigger: 'blur' }],
+          bloodPressure: [{ required: true, message: '请输入血压值', trigger: 'blur' }]
+        }
+      }
+    },
+    methods: {
+      addTag(field, value) {
+        if (value.trim()) {
+          this.formData[field].push(value.trim())
+          if (field === 'allergies') this.inputAllergy = ''
+          else this.inputDisease = ''
+        }
+      },
+      removeTag(field, index) {
+        this.formData[field].splice(index, 1)
+      },
+      submitForm() {
+        this.$refs.formRef.validate(valid => {
+          if (valid) {
+            axios.post('/recommend.do', {
+              memberProfile: {
+                memberId: this.formData.memberId,
+                gender: this.formData.gender,
+                weight: this.formData.weight,
+                height: this.formData.height,
+                allergies: this.formData.allergies,
+                diseases: this.formData.diseases
+              },
+              medicalReport: {
+                bloodSugar: this.formData.bloodSugar,
+                bloodPressure: this.formData.bloodPressure
+              }
+            })
+                    .then(response => {
+                      this.dietPlan = response.data
+                      this.$message.success('饮食计划生成成功！')
+                    })
+                    .catch(error => {
+                      this.$message.error('请求失败: ' + error.message)
+                    })
+          } else {
+            this.$message.error('请填写完整表单')
+          }
+        })
+      },
+      resetForm() {
+        this.$refs.formRef.resetFields()
+        this.formData.allergies = []
+        this.formData.diseases = []
+        this.dietPlan = null
+      }
+    }
+  })
+</script>
+
+</body>
+</html>

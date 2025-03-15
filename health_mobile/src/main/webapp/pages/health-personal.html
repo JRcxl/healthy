@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0,user-scalable=no,minimal-ui">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../img/asset-favico.ico">
+    <title>个人中心</title>
+    <link rel="stylesheet" href="../css/page-health-orderInfo.css"/>
+    <link rel="stylesheet" href="../plugins/elementui/index.css"/>
+    <script src="../plugins/jquery/dist/jquery.min.js"></script>
+    <script src="../plugins/vue/vue.js"></script>
+    <script src="../plugins/vue/axios-0.18.0.js"></script>
+    <script src="../plugins/healthmobile.js"></script>
+    <script src="../plugins/datapicker/datePicker.js"></script>
+    <script src="../plugins/elementui/index.js"></script>
+
+</head>
+<body>
+<div id="app" class="app">
+    <!--页面头头-->
+    <div class="top-header">
+        <!--        <span class="f-left"><i class="icon-back" onclick="history.go(-1)"></i></span>-->
+        <span class="f-left"><i class="icon-back" onclick="javascript:location.href='/pages/index.html'"></i></span>
+        <span class="center">个人中心</span>
+        <span class="f-right"><i><a href="index.html" style="color: white">返回首页</a></i></span>
+    </div>
+    <!--页面内容-->
+    <div class="form-info">
+        <div class="info-title">
+            <span class="name">信息详情</span>
+        </div>
+        <form class="info-form">
+            <div class="input-row">
+                <label>用户名</label>
+                <input v-model="personal.name" type="text" class="input-clear" placeholder="请输入姓名">
+            </div>
+            <div class="input-row single-radio">
+                <label class="radio-title">性别</label>
+                <div class="radio-list">
+                    <div class="radio">
+                        <input v-model="personal.sex" id="item1" type="radio" name="sex" value="1" checked>
+                        <label for="item1"></label>
+                        <span>男</span>
+                    </div>
+                    <div class="radio">
+                        <input v-model="personal.sex" id="item2" type="radio" name="sex" value="2">
+                        <label for="item2"></label>
+                        <span>女</span>
+                    </div>
+                </div>
+            </div>
+            <div class="input-row">
+                <label>
+                    <i style="margin-right: 30px">手机号</i><a href="/pages/health-personal-editphoneNum.html">
+                    <input :disabled="invisible" v-model="personal.phoneNumber" type="text" class="input-clear"
+                           placeholder="请输入手机号">
+                </a>
+                </label>
+            </div>
+            <div class="input-row">
+                <label><i style="margin-right: 10px">身份证号</i>
+                    <input v-model="personal.idCard" type="text" class="input-clear" placeholder="请输入身份证号">
+                </label>
+            </div>
+
+            <div class="date" style="margin: 0">
+                <label>生日&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <i class="icon-date" class="picktime"></i>
+                    <input v-model="personal.birthday" type="text" class="picktime" readonly>
+                </label>
+            </div>
+            <div class="input-row" style="margin: 1px">
+                <label><i style="margin-right: 40px">邮箱</i>
+                    <input v-model="personal.email" type="text" class="input-clear" placeholder="请输入邮箱号">
+                </label>
+            </div>
+            <div class="input-row">
+                <label><i style="margin-right: 40px">密码</i>
+<!--                    <a href="/pages/health-personal-editpwd.html"></a>-->
+                    <input style="border: 0px" v-model="personal.password" type="password" :disabled="invisible"
+                           class="input-clear">
+                </label>
+            </div>
+            <div class="date" style="margin:0">
+                <label>注册日期</label>
+                <i class="" class="picktime"></i>
+                <input :disabled="invisible" v-model="personal.regTime" type="text" class="picktime" readonly>
+            </div>
+        </form>
+        <div class="box-button">
+            <button @click="editPersonal()" type="button" class="btn order-btn">修改个人信息</button>
+<!--            <el-button type="primary" :loading="true" >返回首页</el-button>-->
+        </div>
+    </div>
+</div>
+        <div id="MaxPage" v-model="aaa" >
+            <div  id="page"></div>
+        </div>
+</body>
+<script>
+    $("#page").load("/pages/perfect.html");
+</script>
+<script>
+    let vue = new Vue({
+        el: '#app',
+        data: {
+            personal: {},
+            invisible: true
+        },
+        created() {
+            this.findPersonalInformation();
+
+            axios.post("/login/isLogin.do").then((response) => {
+                if(response.data.flag){
+                    // $("#page").load("/pages/perfect.html");
+                    $("#MaxPage").css("display","block");//显示div
+                    // let aaa=$("#page");
+                    // aaa.css("display","block");
+                    var  name = response.data.data;
+                    axios.get("/member/findPersonalInformation.do?name="+name).then((res) => {
+                        if (res.data.flag) {
+                            let birStr = res.data.data.birthday;
+                            let regStr = res.data.data.regTime;
+                            birStr = birStr.substring(0, 10);
+                            regStr = regStr.substring(0, 10);
+                            //let birthday = res.data.
+                            this.personal = res.data.data;
+                            this.personal.birthday = birStr;
+                            this.personal.regTime = regStr;
+                            window.location.href="login/health-personal.html";
+                        } else {
+                            this.$message.error(res.data.message);
+                        }
+                    })
+                }else {
+                    $("#MaxPage").css("display","none");
+                    this.$confirm('需要登录才能访问，是否进行登录?', '提示', {
+                        confirmButtonText: '登录',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(() => {
+                        window.location.href="login/loginPassword.html";
+                    }).catch(() => {
+                        window.location.href="index.html";
+                    });
+
+                }
+            });
+        },
+        methods: {
+            findPersonalInformation() {
+                axios.get("/member/findPersonalInformation.do?name=").then((res) => {
+                    if (res.data.flag) {
+                        let birStr = res.data.data.birthday;
+                        let regStr = res.data.data.regTime;
+                        birStr = birStr.substring(0, 10);
+                        regStr = regStr.substring(0, 10);
+                        //let birthday = res.data.
+                        this.personal = res.data.data;
+                        this.personal.birthday = birStr;
+                        this.personal.regTime = regStr;
+                    } else {
+                        this.$message.error(res.data.message);
+                    }
+                })
+            },
+            //编辑个人信息
+            editPersonal() {
+                let idCard = this.personal.idCard;
+                if (!checkIdCard(idCard)) {
+                    //校验不通过，提示错误信息
+                    this.$message.error("请输入正确的身份证信息");
+                    return false;
+                }
+                //验证邮箱号
+                // let email = this.personal.email;
+                // if (!checkEamil(email)) {
+                //     //校验不通过，提示错误信息
+                //     this.$message.error("请输入正确的邮箱号");
+                //     return false;
+                //}
+                axios.post("/member/edit.do", this.personal).then((res) => {
+                    if (res.data.flag) {
+                        this.findPersonalInformation();
+                        this.$message.success(res.data.message);
+                        //修改成功 进入个人中心
+                        //window.location.href="/pages/health-personal.html";
+                    } else {
+                        //失败，提示失败信息
+                        this.$message.error(res.data.message);
+                    }
+                });
+            }
+        }
+    })
+</script>
+
+<script>
+    //日期控件
+    var calendar = new datePicker();
+    calendar.init({
+        'trigger': '.picktime', /*按钮选择器，用于触发弹出插件*/
+        'type': 'date', /*模式：date日期；datetime日期时间；time时间；ym年月；*/
+        'maxDate': getSpecifiedDate(new Date(), 0),/*最大日期*/
+        'onSubmit': function () { /*确认时触发事件*/
+            //var theSelectData = calendar.value;
+        },
+        'onClose': function () { /*取消时触发事件*/
+        }
+    });
+</script>
+</html>

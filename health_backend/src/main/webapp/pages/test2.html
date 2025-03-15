@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>重庆实时路况</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <link href="http://api.map.baidu.com/library/TrafficControl/1.4/src/TrafficControl_min.css" rel="stylesheet"
+          type="text/css"/>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=1.4"></script>
+    <script type="text/javascript"
+            src="/http://api.map.baidu.com/library/TrafficControl/1.4/src/TrafficControl_min.js"></script>
+    <link rel="StyleSheet" type="text/css" href="js/dtree.css"/>
+    <script type="text/javascript" src="js/dtree.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            地图
+            var map = new BMap.Map("mapContainer");
+            map.centerAndZoom(new BMap.Point(106.559733, 29.557737), 12);
+            var ctrl = new BMapLib.TrafficControl({
+                showPanel: false
+            });
+
+            map.addControl(new BMap.NavigationControl());
+            map.enableContinuousZoom(false);
+            map.enableScrollWheelZoom(false);
+
+
+            map.addControl(ctrl);
+            ctrl.setAnchor(BMAP_ANCHOR_BOTTOM_RIGHT);
+            ctrl.showTraffic();
+
+        });
+
+        //按坐标移动
+        function goPosition(xPos, yPos) {
+            var mapa = new BMap.Map("mapContainer");
+            mapa.centerAndZoom(new BMap.Point(xPos, yPos), 16);
+            var ctrla = new BMapLib.TrafficControl({
+                showPanel: false
+            });
+
+            mapa.addControl(new BMap.NavigationControl());
+            mapa.enableContinuousZoom(false);
+            mapa.enableScrollWheelZoom(true);
+
+            mapa.addControl(ctrla);
+            ctrla.setAnchor(BMAP_ANCHOR_BOTTOM_RIGHT);
+            ctrla.showTraffic();
+        }
+    </script>
+    <style type="text/css">
+        #mapContainer {
+            width: 748px;
+            height: 500px;
+        }
+
+        #dtreeRegion {
+            height: 500px;
+            overflow: auto;
+        }
+
+        .traffic_container {
+            width: 1010px;
+            background-color: #FFF;
+        }
+
+        .left_map_container {
+            float: left;
+            width: 749px;
+            border: 1px solid #1970CF;
+        }
+
+        .left_map_container h4 {
+            display: block;
+            width: 749px;
+            height: 33px;
+            line-height: 33px;
+            text-indent: 12px;
+            overflow: hidden;
+            padding: 0px;
+            margin: 0px;
+            background: url('images/bg1.gif') repeat-x left top;
+            color: #FFF;
+        }
+
+        .left_map_container h4 .traffic_status_icon {
+            float: right;
+            width: 110px;
+            height: 34px;
+            margin-top: 0px;
+            background: url('images/traffic_status.png') no-repeat center center;
+        }
+
+        .right_region_container {
+            float: right;
+            width: 249px;
+            border: 1px solid #1970CF;
+            background-color: #FFF;
+        }
+
+        .right_region_container h4 {
+            display: block;
+            width: 249px;
+            height: 33px;
+            line-height: 33px;
+            text-indent: 12px;
+            overflow: hidden;
+            padding: 0px;
+            margin: 0px;
+            background: url('images/bg2.gif') repeat-x left top;
+            color: #FFF;
+        }
+
+        .clear_float {
+            clear: both;
+        }
+    </style>
+</head>
+
+<body>
+<!--内容开始-->
+<div class="traffic_container">
+    <div class="left_map_container">
+        <h4>实时路况<span class="traffic_status_icon"></span></h4>
+        <div id="mapContainer"></div>
+    </div>
+    <div class="right_region_container">
+        <h4>区域导航</h4>
+        <div>
+            <div id="dtreeRegion" class="dtree">
+                <script type="text/javascript">
+                    d = new dTree('d', 'js/dtree');
+
+                    d.add(0, -1, '重庆市', "javascript:window.location.reload(true);");
+
+                    d.add(1, 0, '按区域', '');
+                    d.add(2, 1, '渝中区', '');
+                    d.add(3, 1, '江北区', '');
+                    d.add(4, 1, '九龙坡区', '');
+                    d.add(5, 1, '南岸区', '');
+                    d.add(6, 1, '大渡口区', '');
+                    d.add(7, 1, '沙坪坝区', '');
+                    d.add(8, 1, '巴南区', '');
+
+                    d.add(9, 0, '按商圈', '');
+                    d.add(10, 9, '观音桥商圈', '');
+                    d.add(11, 9, '解放碑商圈', '');
+                    d.add(12, 9, '南坪商圈', '');
+                    d.add(13, 9, '沙坪坝商圈', '');
+                    d.add(14, 9, '杨家坪商圈', '');
+
+                    d.add(15, 0, '其它', '');
+                    d.add(16, 15, '重点路段', '');
+                    d.add(17, 15, '车流量最大', '');
+                    d.add(18, 15, '路口', '');
+                    d.add(19, 15, '隧道', '');
+                    d.add(20, 15, '立交', '');
+                    d.add(21, 15, '内环', '');
+                    d.add(22, 15, '道口', '');
+
+                    d.add(23, 2, '解放碑', 'javascript:goPosition(106.583617,29.563506);');
+                    d.add(24, 2, '两路口', 'javascript:goPosition(106.555438,29.558881);');
+                    d.add(25, 2, '大坪', 'javascript:goPosition(106.523903,29.544944);');
+                    d.add(26, 2, '牛角沱', 'javascript:goPosition(106.549168,29.566104);');
+                    d.add(27, 2, '大溪沟', 'javascript:goPosition(106.563801,29.56967);');
+                    d.add(28, 2, '七星岗', 'javascript:goPosition(106.571699,29.562156);');
+                    d.add(29, 2, '较场口', 'javascript:goPosition(106.579362,29.559592);');
+                    d.add(30, 2, '朝天门', 'javascript:goPosition(106.592146,29.568784);');
+                    d.add(31, 2, '望龙门', 'javascript:goPosition(106.590191,29.561428);');
+                    d.add(32, 2, '嘉滨路', 'javascript:goPosition(106.567947,29.570582);');
+                    d.add(33, 2, '菜园坝', 'javascript:goPosition(106.556196,29.555553);');
+                    d.add(34, 2, '化龙桥', 'javascript:goPosition(106.525077,29.554869);');
+                    d.add(35, 2, '南纪门', 'javascript:goPosition(106.578916,29.555099);');
+                    d.add(36, 2, '上清寺', 'javascript:goPosition(106.552244,29.566832);');
+                    d.add(37, 2, '石油路', 'javascript:goPosition(106.515073,29.5439);');
+                    d.add(38, 2, '袁家岗', 'javascript:goPosition(106.520419,29.534975);');
+                    d.add(39, 2, '鹅岭', 'javascript:goPosition(106.540406,29.554006);');
+                    d.add(40, 2, '临江门', 'javascript:goPosition(106.581941,29.564158);');
+                    d.add(41, 2, '小什字', 'javascript:goPosition(106.589877,29.565937);');
+                    d.add(42, 2, '新华路', 'javascript:goPosition(106.580553,29.558892);');
+
+
+                    d.add(43, 3, '华新街', 'javascript:goPosition(106.543138,29.574147);');
+                    d.add(44, 3, '观音桥', 'javascript:goPosition(106.538792,29.580737);');
+                    d.add(45, 3, '五里店', 'javascript:goPosition(106.563819,29.586063);');
+                    d.add(46, 3, '大石坝', 'javascript:goPosition(106.501792,29.578919);');
+                    d.add(47, 3, '唐家沱', 'javascript:goPosition(106.652593,29.603118);');
+                    d.add(48, 3, '鱼嘴', 'javascript:goPosition(106.767665,29.62881);');
+                    d.add(49, 3, '复盛', 'javascript:goPosition(106.804952,29.646554);');
+                    d.add(50, 3, '红旗河沟', 'javascript:goPosition(106.53279,29.59129);');
+                    d.add(51, 3, '猫儿石', 'javascript:goPosition(106.519361,29.568616);');
+                    d.add(52, 3, '红土地', 'javascript:goPosition(106.557343,29.590287);');
+
+
+                    d.add(53, 4, '杨家坪', 'javascript:goPosition(106.521175,29.515416);');
+                    d.add(54, 4, '谢家湾', 'javascript:goPosition(106.523333,29.527181);');
+                    d.add(55, 4, '石坪桥', 'javascript:goPosition(106.509552,29.521763);');
+                    d.add(56, 4, '黄桷坪', 'javascript:goPosition(106.548841,29.495879);');
+                    d.add(57, 4, '中梁山', 'javascript:goPosition(106.440895,29.46962);');
+                    d.add(58, 4, '石桥铺', 'javascript:goPosition(106.491476,29.538543);');
+                    d.add(59, 4, '渝州路', 'javascript:goPosition(106.496799,29.539414);');
+                    d.add(60, 4, '陈家坪', 'javascript:goPosition(106.495336,29.52806);');
+                    d.add(61, 4, '毛线沟', 'javascript:goPosition(106.512382,29.503822);');
+
+
+                    d.add(62, 5, '南坪', 'javascript:goPosition(106.57254,29.530635);');
+                    d.add(63, 5, '铜元局', 'javascript:goPosition(106.552225,29.540172);');
+                    d.add(64, 5, '工贸', 'javascript:goPosition(106.569594,29.538037);');
+                    d.add(65, 5, '四公里', 'javascript:goPosition(106.584581,29.519678);');
+                    d.add(66, 5, '南滨路', 'javascript:goPosition(106.594465,29.551034);');
+                    d.add(67, 5, '弹子石', 'javascript:goPosition(106.598397,29.587488);');
+
+                    d.add(68, 6, '九宫庙', 'javascript:goPosition(106.490759,29.479277);');
+                    d.add(69, 6, '新山村', 'javascript:goPosition(106.493947,29.487561);');
+                    d.add(70, 6, '大堰', 'javascript:goPosition(106.501668,29.495399);');
+                    d.add(71, 6, '华福路', 'javascript:goPosition(106.543721,29.571412);');
+                    d.add(72, 6, '黄桷坪', 'javascript:goPosition(106.470309,29.403636);');
+
+                    d.add(73, 7, '小龙坎', 'javascript:goPosition(106.472813,29.559508);');
+                    d.add(74, 7, '马家岩', 'javascript:goPosition(106.471639,29.545253);');
+                    d.add(75, 7, '天星桥', 'javascript:goPosition(106.461781,29.551726);');
+                    d.add(76, 7, '高庙村', 'javascript:goPosition(106.475851,29.542392);');
+                    d.add(77, 7, '杨公桥', 'javascript:goPosition(106.456883,29.567999);');
+                    d.add(78, 7, '烈士墓', 'javascript:goPosition(106.45196,29.574729);');
+                    d.add(79, 7, '磁器口', 'javascript:goPosition(106.458314,29.585766);');
+                    d.add(80, 7, '双碑', 'javascript:goPosition(106.447057,29.609335);');
+                    d.add(81, 7, '歌乐山', 'javascript:goPosition(106.426128,29.574044);');
+                    d.add(82, 7, '凤天路', 'javascript:goPosition(106.461245,29.537082);');
+                    d.add(83, 7, '童家桥', 'javascript:goPosition(106.452779,29.583193);');
+                    d.add(84, 7, '井口', 'javascript:goPosition(106.451224,29.643568);');
+
+
+                    d.add(85, 8, '鱼洞', 'javascript:goPosition(106.512824,29.3817);');
+                    d.add(86, 8, '李家沱', 'javascript:goPosition(106.545491,29.471869);');
+                    d.add(87, 8, '龙洲湾', 'javascript:goPosition(106.549377,29.407805);');
+
+
+                    d.add(88, 10, '观音桥环道', 'javascript:goPosition(106.534795,29.57937);');
+                    d.add(89, 10, '建新东路', 'javascript:goPosition(106.544495,29.580445);');
+                    d.add(90, 10, '建新南路', 'javascript:goPosition(106.50748,29.606693);');
+
+                    d.add(91, 11, '南区路', 'javascript:goPosition(106.567401,29.556795);');
+                    d.add(92, 11, '解放西路', 'javascript:goPosition(106.580419,29.555268);');
+                    d.add(93, 11, '北区路', 'javascript:goPosition(106.574034,29.568349);');
+
+                    d.add(94, 12, '南坪环道', 'javascript:goPosition(106.575101,29.529783);');
+
+
+                    d.add(95, 13, '汉渝路', 'javascript:goPosition(106.474659,29.565);');
+                    d.add(96, 13, '沙杨路', 'javascript:goPosition(106.46553,29.56982);');
+                    d.add(97, 13, '沙坪坝环道', 'javascript:goPosition(106.476385,29.560609);');
+
+
+                    d.add(98, 14, '渝州路', 'javascript:goPosition(106.494711,29.53896);');
+                    d.add(99, 14, '石杨路', 'javascript:goPosition(106.492954,29.53186);');
+                    d.add(100, 14, '袁茄路', 'javascript:goPosition(106.516577,29.529298);');
+                    d.add(101, 14, '杨家坪环道', 'javascript:goPosition(106.521206,29.514318);');
+
+                    d.add(102, 16, '黄花园大桥', 'javascript:goPosition(106.573049,29.57288);');
+                    d.add(103, 16, '一号桥', 'javascript:goPosition(106.57628,29.566223);');
+                    d.add(104, 16, '长江大桥', 'javascript:goPosition(106.569623,29.551281);');
+                    d.add(105, 16, '菜园坝长江大桥', 'javascript:goPosition(106.557759,29.549695);');
+                    d.add(106, 16, '鹅公岩大桥', 'javascript:goPosition(106.536998,29.526316);');
+                    d.add(107, 16, '大公馆立交', 'javascript:goPosition(106.513508,29.526053);');
+                    d.add(108, 16, '陈家坪立交', 'javascript:goPosition(106.494598,29.529097);');
+                    d.add(109, 16, '歇台子', 'javascript:goPosition(106.503907,29.540969);');
+                    d.add(110, 16, '嘉陵江石门大桥', 'javascript:goPosition(106.487212,29.568278);');
+                    d.add(111, 16, '汉渝路立交', 'javascript:goPosition(106.4766,29.565629);');
+                    d.add(112, 16, '杨公桥立交', 'javascript:goPosition(106.459316,29.569273);');
+                    d.add(113, 16, '嘉陵江大桥', 'javascript:goPosition(106.547398,29.568356);');
+                    d.add(114, 16, '黄泥磅立交', 'javascript:goPosition(106.540145,29.593351);');
+                    d.add(115, 16, '朝天门长江大桥', 'javascript:goPosition(106.585165,29.591576);');
+                    d.add(116, 16, '江南立交桥', 'javascript:goPosition(106.582567,29.521955);');
+                    d.add(117, 16, '杨家坪环道', 'javascript:goPosition(106.520159,29.517706);');
+                    d.add(118, 16, '石坪桥立交桥', 'javascript:goPosition(106.509232,29.522332);');
+                    d.add(119, 16, '大坪环道', 'javascript:goPosition(106.523941,29.545087);');
+                    d.add(120, 16, '高九路', 'javascript:goPosition(106.49719,29.55255);');
+                    d.add(121, 16, '观音桥环道', 'javascript:goPosition(106.53608,29.578777);');
+                    d.add(122, 16, '两路口环道', 'javascript:goPosition(106.555875,29.559384);');
+                    d.add(123, 16, '五里店转盘', 'javascript:goPosition(106.567931,29.588993);');
+                    d.add(124, 16, '红旗河沟转盘', 'javascript:goPosition(106.533967,29.589692);');
+                    d.add(125, 16, '三角碑转盘', 'javascript:goPosition(106.471603,29.563998);');
+                    d.add(126, 16, '南坪转盘', 'javascript:goPosition(106.573467,29.53489);');
+                    d.add(127, 16, '牛角沱立交', 'javascript:goPosition(106.549999,29.564068);');
+                    d.add(128, 16, '沙坪坝环道', 'javascript:goPosition(106.471247,29.563499);');
+                    d.add(129, 16, '菜园坝转盘', 'javascript:goPosition(106.556529,29.554922);');
+                    d.add(130, 16, '较场口转盘', 'javascript:goPosition(106.555694,29.554481);');
+                    d.add(131, 16, '上清寺转盘', 'javascript:goPosition(106.552745,29.566845);');
+
+                    d.add(132, 17, '机场路', 'javascript:goPosition(106.641328,29.724547);');
+                    d.add(133, 17, '红锦大道', 'javascript:goPosition(106.533839,29.589145);');
+                    d.add(134, 17, '谢陈路', 'javascript:goPosition(106.491966,29.52765);');
+                    d.add(135, 17, '建新北路', 'javascript:goPosition(106.538253,29.581921);');
+                    d.add(136, 17, '建新南路', 'javascript:goPosition(106.544309,29.569801);');
+                    d.add(137, 17, '嘉华隧道', 'javascript:goPosition(106.527832,29.540373);');
+                    d.add(138, 17, '红黄路', 'javascript:goPosition(106.546545,29.594403);');
+                    d.add(139, 17, '新南路', 'javascript:goPosition(106.518712,29.606533);');
+                    d.add(140, 17, '龙华大道', 'javascript:goPosition(106.515155,29.604335);');
+                    d.add(141, 17, '石黄隧道', 'javascript:goPosition(106.572071,29.565451);');
+                    d.add(142, 17, '成渝高速二郎段', 'javascript:goPosition(106.467898,29.520238);');
+                    d.add(143, 17, '内环快速路', 'javascript:goPosition(106.61712,29.465233);');
+
+                    d.add(144, 18, '临江门交叉口', 'javascript:goPosition(106.579802,29.565643);');
+                    d.add(145, 18, '嘉华隧道与黄沙溪立交汇流点', 'javascript:goPosition(106.527946,29.539845);');
+                    d.add(146, 18, '一号桥交叉口', 'javascript:goPosition(106.574663,29.568001);');
+                    d.add(147, 18, '鲤鱼池交叉口', 'javascript:goPosition(106.552723,29.579538);');
+                    d.add(148, 18, '新溉路红唐路交叉口', 'javascript:goPosition(106.538935,29.605301);');
+                    d.add(149, 18, '汽博交叉口', 'javascript:goPosition(106.576661,29.647225);');
+                    d.add(150, 18, '松石大道松石北路交叉口', 'javascript:goPosition(106.580452,29.642602);');
+                    d.add(151, 18, '柏树堡交叉口', 'javascript:goPosition(106.488784,29.462561);');
+                    d.add(152, 18, '星光大道与新南路交叉口', 'javascript:goPosition(106.51433,29.606553);');
+                    d.add(153, 18, '一碗水交叉口', 'javascript:goPosition(106.623851,29.703702);');
+                    d.add(154, 18, '石碾盘交叉口', 'javascript:goPosition(106.465483,29.555557);');
+                    d.add(155, 18, '迎宾大道火炬路交叉口', 'javascript:goPosition(106.468498,29.51013);');
+                    d.add(156, 18, '渝州路科园四路交叉口', 'javascript:goPosition(106.500948,29.540378);');
+                    d.add(157, 18, '人和街人民路交叉口', 'javascript:goPosition(106.566071,29.569531);');
+                    d.add(158, 18, '五里店交叉口', 'javascript:goPosition(106.567844,29.588502);');
+                    d.add(159, 18, '金开大道和睦交叉口', 'javascript:goPosition(106.573148,29.685461);');
+                    d.add(160, 18, '星光大道洪湖东路交叉口', 'javascript:goPosition(106.513986,29.613464);');
+                    d.add(161, 18, '天陈路站西路交叉口', 'javascript:goPosition(106.465202,29.560982);');
+                    d.add(162, 18, '大石路白鹤路交叉口', 'javascript:goPosition(106.562747,29.521342);');
+                    d.add(163, 18, '腾龙大道弹子石新街路口', 'javascript:goPosition(106.601509,29.586009);');
+                    d.add(164, 18, '学府大道青龙路交叉口', 'javascript:goPosition(106.580671,29.517962);');
+
+                    d.add(165, 19, '渝黔高速真武山隧道', 'javascript:goPosition(106.580671,29.517962);');
+                    d.add(166, 19, '渝遂高速大学城隧道', 'javascript:goPosition(106.402859,29.564417);');
+                    d.add(167, 19, '成渝高速中梁山隧道', 'javascript:goPosition(106.405107,29.525546);');
+                    d.add(168, 19, '绕城高速北碚隧道', 'javascript:goPosition(106.465529,29.774085);');
+                    d.add(169, 19, '绕城高速一品隧道', 'javascript:goPosition(106.57695,29.286419);');
+                    d.add(170, 19, '绕城高速玉峰山隧道', 'javascript:goPosition(106.755806,29.720163);');
+
+                    d.add(171, 20, '陈家坪立交', 'javascript:goPosition(106.494583,29.529193);');
+                    d.add(172, 20, '大公馆立交', 'javascript:goPosition(106.51352,29.52605);');
+                    d.add(173, 20, '红旗河沟立交', 'javascript:goPosition(106.533264,29.589403);');
+                    d.add(174, 20, '新牌坊立交', 'javascript:goPosition(106.526329,29.6055);');
+                    d.add(175, 20, '二郎立交', 'javascript:goPosition(106.468948,29.520176);');
+                    d.add(176, 20, '四公里立交', 'javascript:goPosition(106.582699,29.521973);');
+                    d.add(177, 20, '西环立交', 'javascript:goPosition(106.446223,29.520374);');
+                    d.add(178, 20, '新溉路紫荆路立交', 'javascript:goPosition(106.538892,29.606266);');
+                    d.add(179, 20, '高庙村立交', 'javascript:goPosition(106.475851,29.542392);');
+                    d.add(180, 20, '红土地立交', 'javascript:goPosition(106.552702,29.591412);');
+                    d.add(181, 20, '金渝立交', 'javascript:goPosition(106.578837,29.643934);');
+                    d.add(182, 20, '石板坡立交', 'javascript:goPosition(106.569327,29.557275);');
+                    d.add(183, 20, '黄花园立交', 'javascript:goPosition(106.571997,29.568458);');
+                    d.add(184, 20, '鹅公岩立交', 'javascript:goPosition(106.53017,29.52621);');
+                    d.add(185, 20, '东环立交', 'javascript:goPosition(106.563982,29.627197);');
+                    d.add(186, 20, '李家坪立交', 'javascript:goPosition(106.527127,29.570363);');
+                    d.add(187, 20, '大石路立交', 'javascript:goPosition(106.562781,29.52293);');
+                    d.add(188, 20, '古木峰立交', 'javascript:goPosition(106.531582,29.62956);');
+
+
+                    d.add(189, 21, '东环至遂渝立交段', 'javascript:goPosition(106.327381,29.680844);');
+                    d.add(190, 21, '西环至茶园立交段', 'javascript:goPosition(106.630508,29.498456);');
+                    d.add(191, 21, '北环至杨公桥段', 'javascript:goPosition(106.45823,29.567339);');
+                    d.add(192, 21, '南环至茶园段', 'javascript:goPosition(106.602967,29.393491);');
+
+                    d.add(193, 22, '成渝高速', 'javascript:goPosition(106.475646,29.520302);');
+                    d.add(194, 22, '渝长高速', 'javascript:goPosition(106.584684,29.633705);');
+                    d.add(195, 22, '渝黔高速', 'javascript:goPosition(106.601833,29.386903);');
+                    d.add(196, 22, '遂渝高速', 'javascript:goPosition(106.397272,29.596499);');
+                    d.add(197, 22, '渝武高速', 'javascript:goPosition(106.501039,29.615552);');
+                    d.add(198, 22, '璧山隧道', 'javascript:goPosition(106.277433,29.585561);');
+
+                    /*d.add(8,1,'区域1_1','javascript:goPosition(106.594455,29.563278,16);');
+                    d.add(9,1,'区域1_2','javascript:goPosition(106.594455,29.553278,16);');
+                    d.add(2,0,'区域2','javascript:goPosition(106.594455,29.573278,16);');*/
+
+                    document.write(d);
+                </script>
+            </div>
+        </div>
+    </div>
+    <div class="clear_float"></div>
+</div>
+<!--内容结束-->
+<div style="color:#444;font-size:12px;padding:10px 3px;">&copy; 该代码从<a
+        href="http://www.cqjg.gov.cn/trafficMap/index.html" target="_blank">重庆公安交通管理信息网</a>修改而来
+</div>
+</body>
+</html>

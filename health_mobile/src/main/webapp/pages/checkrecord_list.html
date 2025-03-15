@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0,user-scalable=no,minimal-ui">
+        <meta name="description" content="">
+        <meta name="author" content="">
+        <link rel="icon" href="../img/asset-favico.ico">
+        <title>传智健康</title>
+        <link rel="stylesheet" href="../css/page-health-index.css" />
+        <link rel="stylesheet" href="../css/page-health-login.css" />
+        <link rel="stylesheet" href="../plugins/elementui/index.css" />
+        <script src="../plugins/jquery/dist/jquery.min.js"></script>
+        <script src="../plugins/healthmobile.js"></script>
+        <script src="../plugins/vue/vue.js"></script>
+        <script src="../plugins/vue/axios-0.18.0.js"></script>
+        <script src="../plugins/elementui/index.js"></script>
+    </head>
+    <body data-spy="scroll" data-target="#myNavbar" data-offset="150">
+        <div class="app" id="app">
+            <!-- 页面头部 -->
+            <div class="top-header" id="q">
+                <span class="f-left"><i class="icon-back" onclick="history.go(-1)"></i></span>
+                <span class="center">智慧医疗</span>
+                <span class="f-right"><i class="icon-more"></i></span>
+            </div>
+            <!-- 页面内容 -->
+            <div class="contentBox">
+                <div class="list-column2">
+                    <ul class="list">
+                        <li class="type-item" style="width: 100%">
+                            <a class="link-page" v-for="key in Object.keys(members)" :key="key">
+                                <div class="type-title" >
+                                    <h3>{{ members[key].username}}</h3>
+                                    <p>{{  members[key].sex === 1 ? '女' : '男' }}</p>
+                                    <p>{{members[key].mealname}}</p>
+                                    <p>{{ members[key].orderDate}}</p>
+                                </div>
+                                <div class="type-icon" @click="toggleVisibility(key)">
+                                    {{ members[key].isshow ? '收起' : '查看' }}
+                                </div>
+                                <div class="type-details" v-show="members[key].isshow">
+                                    <p>体检数据</p>
+                                    <div v-for="(group, groupName) in members[key].result_data" :key="groupName">
+                                        <h5>{{ groupName }}</h5>
+                                        <ul>
+                                            <li v-for="(test, testName) in group" :key="testName">
+                                                <strong>{{ testName }}:</strong> {{ test.结果 }} {{ test.单位 }} ({{ test.状态 }})
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+
+                </div>
+            </div>
+        </div>
+    <script>
+        $("#q").load("perfect.html");
+</script>
+        <script>
+            var vue = new Vue({
+                el:'#app',
+                data:{
+                    members:[],
+                },
+                created() {
+                    // 获取 Cookie 中的 id 值
+                    let memberId = this.getCookie('memberId');
+                    if (memberId) {
+                        // 发送请求至后端
+                        this.fetchMemberData(memberId);
+                        console.log("memberid:"+memberId)
+                    } else {
+                        console.log("Cookie 中没有 id");
+                    }
+                },
+                methods:{
+                    toggleVisibility(key) {
+
+                        if (!this.members[key].hasOwnProperty('isshow')) {
+                            this.$set(this.members[key], 'isshow', false);
+                        }
+                        this.members[key].isshow = !this.members[key].isshow;
+                    },
+                    getCookie(name) {
+                        let value = '; ' + document.cookie;
+                        let parts = value.split('; ' + name + '=');
+                        if (parts.length == 2) return parts.pop().split(';').shift();
+                        return null;
+                    },
+
+                    // 发送请求获取成员数据
+                    fetchMemberData(memberId) {
+                        axios.post('/findExamData.do?memberid='+memberId)
+                            .then(response => {
+                                // 假设返回的数据结构为 { data: { username, sex, mealname, examresult } }
+                                this.members= response.data
+                                Object.keys(this.members).forEach(key => {
+                                    this.$set(this.members[key], 'isshow', false);
+                                });
+                                //console.log("返回数据: ", response.data);
+                            })
+                            .catch(error => {
+                                console.error("请求出错: ", error);
+                            });
+                    }
+
+                },
+                mounted(){
+                    axios.post("/login/isLogin.do").then((response) => {
+                        if(response.data.flag){
+                            //显示悬浮菜单
+                        }else {
+                            this.$confirm('需要登录才能访问，是否进行登录?', '提示', {
+                                confirmButtonText: '登录',
+                                cancelButtonText: '取消',
+                                type: 'warning'
+                            }).then(() => {
+                                window.location.href="login/loginPassword.html";
+                            }).catch(() => {
+                                window.location.href="index.html";
+                            });
+                        }
+                    });
+                }
+            });
+        </script>
+        <style scoped>
+            .link-page {
+                display: block;
+                padding: 20px;
+                margin: 10px 0;
+                border: 1px solid #e0e0e0;
+                border-radius: 8px;
+                transition: all 0.3s;
+            }
+
+            .type-icon {
+                cursor: pointer;
+                color: #409eff;
+                float: right;
+            }
+
+            .type-details {
+                display: block; /* 确保默认显示 */
+                margin-top: 15px;
+                padding: 10px;
+                background: #f8f8f8;
+                border-radius: 4px;
+            }
+            ul {
+                list-style-type: none;
+                padding-left: 0;
+            }
+
+            li {
+                margin: 5px 0;
+                font-size: 14px;
+            }
+
+            h5 {
+                font-size: 16px;
+                margin-top: 10px;
+            }
+        </style>
+    </body>
+</html>

@@ -1,0 +1,172 @@
+﻿<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>index</title>
+
+    <script type="text/javascript" src="js/jquery.js"></script>
+    <link rel="stylesheet" href="css/comon0.css">
+    <script src="../js/axios-0.18.0.js"></script>
+    <script src="../plugins/echarts/echarts.min.js"></script>
+
+
+</head>
+<script>
+    $(window).load(function () {
+        $(".loading").fadeOut()
+    })
+
+    /****/
+    $(document).ready(function () {
+        var whei = $(window).width()
+        $("html").css({fontSize: whei / 20})
+        $(window).resize(function () {
+            var whei = $(window).width()
+            $("html").css({fontSize: whei / 20})
+        });
+    });
+</script>
+
+
+
+<script language="JavaScript" src="js/js.js"></script>
+<body>
+
+<div class="canvas" style="opacity: .2">
+    <iframe frameborder="0" src="js/index.html" style="width: 100%; height: 100%"></iframe>
+</div>
+<div class="loading">
+    <div class="loadbox"><img src="picture/loading.gif"> 页面加载中...</div>
+</div>
+<div class="head">
+    <h1>可视化数据</h1>
+    <div class="weather"><span style="font-size: x-large" id="showTime"></span></div>
+
+    <script>
+        var t = null;
+        t = setTimeout(time, 1000);//開始运行
+        function time() {
+            clearTimeout(t);//清除定时器
+            dt = new Date();
+            var y = dt.getFullYear();
+            var mt = dt.getMonth() + 1;
+            var day = dt.getDate();
+            var h = dt.getHours();//获取时
+            var m = dt.getMinutes();//获取分
+            var s = dt.getSeconds();//获取秒
+            document.getElementById("showTime").innerHTML = y + "年" + mt + "月" + day + "-" + h + "时" + m + "分" + s + "秒";
+            t = setTimeout(time, 1000); //设定定时器，循环运行
+        }
+
+    </script>
+
+
+</div>
+
+<!--内容-->
+<div class="mainbox">
+    <ul class="clearfix">
+        <li>
+            <div class="boxall" style="height: 3.5rem;width: 5.76rem">
+                <div class="alltitle">本月到/(未)诊人数</div>
+                <div class="allnav" id="echart1"></div>
+                <div class="boxfoot"></div>
+            </div>
+            <div class="boxall" style="height: 3.5rem;width: 5.76rem">
+                <div class="alltitle">年龄分布</div>
+                <div class="allnav" id="echart2"></div>
+                <div class="boxfoot"></div>
+            </div>
+            <div class="boxall" style="height: 4.8rem;width: 5.76rem">
+                <div class="alltitle">性别分布</div>
+                <div class="allnav" id="echart3"></div>
+                <div class="boxfoot">
+
+                </div>
+            </div>
+        </li>
+        <li>
+<!--            体检人数-->
+            <div class="bar">
+                <div class="barbox">
+                    <ul class="clearfix">
+                        <div id="app">
+                            <li class="pulll_left counter">{{count1}}</li>
+                            <li class="pulll_left counter">{{count2}}</li>
+                        </div>
+                    </ul>
+                </div>
+                <div class="barbox2">
+                    <ul class="clearfix">
+                        <li class="pulll_left">全年体检人数</li>
+                        <li class="pulll_left">当月体检人数</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="map">
+                <div class="map1"><img src="picture/lbx.png"></div>
+                <div class="map2"><img src="picture/jt.png"></div>
+                <div class="map3"><img src="picture/map.png"></div>
+                <div class="map4" id="map_1"></div>
+            </div>
+        </li>
+        <li>
+            <div class="boxall" style="height:4.5rem">
+                <div class="alltitle">预约套餐占比</div>
+                <div class="allnav" id="echart4"></div>
+                <div class="boxfoot"></div>
+            </div>
+            <div class="boxall" style="height: 5.5rem">
+                <div class="alltitle">体检中心流动人群来源地址</div>
+                <div class="allnav" id="echart5"></div>
+                <div class="boxfoot"></div>
+            </div>
+
+        </li>
+    </ul>
+</div>
+<div class="back"></div>
+
+
+<script type="text/javascript" src="js/china.js"></script>
+<script type="text/javascript" src="js/area_echarts.js"></script>
+
+
+
+<script src="../js/vue.js"></script>
+
+<!--全年体检人数，每月体检人数-->
+<script>
+    new Vue({
+        el:"#app",
+        data:{
+
+                count1:"",
+                count2:""
+
+        },
+        methods:{
+            //全年体检人数，每月体检人数
+            findYear(){
+                axios.post("/report/findYear.do").then((resp)=>{
+                    if (resp.data.flag){
+                        //赋值
+                        this.count1=resp.data.data[0];
+                        this.count2=resp.data.data[1];
+                    }else {
+                        //失败
+                        this.$message.error(resp.data.data.message);
+                    }
+                });
+            }
+        },
+        created(){
+          this.findYear();
+          window.setInterval(this.findYear,5000);
+        }
+    });
+
+</script>
+
+</body>
+</html>
