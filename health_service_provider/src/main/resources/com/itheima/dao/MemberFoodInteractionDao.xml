@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itheima.dao.MemberFoodInteractionDao">
+
+
+    <resultMap id="MemberFoodInteractionMap" type="com.itheima.entity.MemberFoodInteraction">
+        <id column="interaction_id" property="interactionId"/>
+        <result column="member_id" property="memberId"/>
+        <result column="food_id" property="foodId"/>
+        <result column="rating" property="rating"/>
+        <result column="click_count" property="clickCount"/>
+        <result column="favorite" property="favorite"/>
+        <result column="timestamp" property="timestamp"/>
+    </resultMap>
+
+    <select id="selectByMemberId" resultMap="MemberFoodInteractionMap">
+        SELECT * FROM member_food_interaction
+        WHERE member_id = #{memberId}
+    </select>
+
+    <select id="findAllInteraction" resultMap="MemberFoodInteractionMap">
+        SELECT * FROM member_food_interaction
+    </select>
+
+
+
+</mapper>

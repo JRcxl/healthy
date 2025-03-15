@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itheima.dao.FlowdataDao">
+
+<!--获取体检中心流动人群来源地址-->
+    <select id="findAddressCount" resultType="map">
+    SELECT address,count(address) as value FROM `t_flowdata` GROUP BY address
+    </select>
+
+    <!--    带条件查询-->
+    <select id="findPage" parameterType="string" resultType="com.itheima.pojo.Flowdata">
+        SELECT * FROM `t_flowdata`
+        <if test="value !=null and value.length>0">
+            <where>
+                name like concat('%',#{value},'%') or address like concat('%',#{value},'%')
+            </where>
+        </if>
+    </select>
+
+    <!--    新增-->
+    <insert id="save" parameterType="com.itheima.pojo.Flowdata" >
+        insert into `t_flowdata`  values(null,#{address},#{name},#{idcard},#{remark})
+    </insert>
+
+    <!--    删除-->
+    <delete id="deleteById" parameterType="Integer">
+        delete from `t_flowdata` where id=#{id}
+    </delete>
+
+
+    <!--    根据id查询-->
+    <select id="findById" parameterType="Integer" resultType="com.itheima.pojo.Flowdata">
+        select * from `t_flowdata` where id=#{id}
+    </select>
+
+    <!--    修改-->
+    <update id="update" parameterType="com.itheima.pojo.Flowdata">
+        update `t_flowdata`
+        <set>
+            <if test="name !=null">
+                name=#{name},
+            </if>
+            <if test="address != null">
+                address = #{address},
+            </if>
+            <if test="idcard != null">
+                idcard = #{idcard},
+            </if>
+            <if test="remark != null">
+                remark = #{remark},
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+</mapper>

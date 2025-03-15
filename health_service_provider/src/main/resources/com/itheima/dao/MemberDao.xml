@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itheima.dao.MemberDao">
+
+    <select id="findMemberByTelephone" resultType="com.itheima.pojo.Member">
+        select * from t_member where  phoneNumber = #{telephone}
+    </select>
+        <!--    添加会员-->
+   <insert id="add" parameterType="com.itheima.pojo.Member" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+        insert into t_member
+        (fileNumber,name,sex,idCard,phoneNumber,regTime,password,email,birthday,remark)
+        values
+        (#{fileNumber},#{name},#{sex},#{idCard},#{phoneNumber},#{regTime},#{password},#{email},#{birthday},#{remark})
+    </insert>
+<!--    根据日期查询某一天之前的会员数-->
+    <select id="findMemberByregTime" resultType="java.lang.Integer">
+        select count(id) from t_member where regTime &lt;=  #{value}
+    </select>
+<!--    今日新增会员数-->
+    <select id="findMemberByDate" resultType="java.lang.Integer">
+        select count(id) from t_member where regTime =  #{value}
+    </select>
+<!--    总的会员数-->
+    <select id="findMemner" resultType="java.lang.Integer">
+        select count(id) from t_member
+    </select>
+<!--    本周新增会员数-->
+    <select id="findMemberByAfterDate" resultType="java.lang.Integer">
+         select count(id) from t_member where regTime &gt;=  #{value}
+    </select>
+<!--    查询会员-->
+    <select id="findMemberByUsername" resultType="com.itheima.pojo.Member">
+        select * from t_member where phoneNumber = #{username}
+    </select>
+<!--    根据密码登录-->
+    <select id="findMemeberByNameAndPassword" resultType="com.itheima.pojo.Member">
+        select * from t_member where  name = #{param1} and password = #{param2}
+    </select>
+<!--    修改会员信息-->
+    <update id="edit" parameterType="com.itheima.pojo.Member">
+        update t_member
+        <set>
+            <if test="fileNumber != null and fileNumber != ''">fileNumber = #{fileNumber},</if>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="sex != null and sex != ''">sex = #{sex},</if>
+            <if test="idCard != null and idCard != ''">idCard = #{idCard},</if>
+            <if test="phoneNumber != null and phoneNumber != ''">phoneNumber = #{phoneNumber},</if>
+            <if test="regTime != null">regTime = #{regTime},</if>
+            <if test="password != null and password != ''">password = #{password},</if>
+            <if test="email != null and email != ''">email = #{email},</if>
+            <if test="birthday != null">birthday = #{birthday},</if>
+            <if test="remark != null and remark != ''">remark = #{remark},</if>
+        </set>
+        where id = #{id}
+    </update>
+<!--    根据邮箱查询会员信息-->
+    <select id="findByEmail" resultType="com.itheima.pojo.Member">
+        select * from t_member where email = #{email}
+    </select>
+
+<!--    -->
+    <!--    查询年龄-->
+    <select id="findAge"  resultType="map">
+        select
+        (SELECT count(birthday) FROM t_member where birthday is not null and  (ROUND(DATEDIFF(CURDATE(), birthday)))/365 &lt;=18) as '1~18(岁)',
+        (SELECT count(birthday) FROM t_member where birthday is not null and  (ROUND(DATEDIFF(CURDATE(), birthday)))/365 &gt;18 and (ROUND(DATEDIFF(CURDATE(), birthday)))/365 &lt;=45) as '18~45(岁)',
+        (SELECT count(birthday) FROM t_member where birthday is not null and  (ROUND(DATEDIFF(CURDATE(), birthday)))/365 &gt;45 and (ROUND(DATEDIFF(CURDATE(), birthday)))/365 &lt;=60) as '45~60(岁)',
+        (SELECT count(birthday) FROM t_member where birthday is not null and  (ROUND(DATEDIFF(CURDATE(), birthday)))/365 &gt;60) as '60(岁)以上'
+    </select>
+
+
+<!--    性别占比-->
+    <select id="findSex" resultType="Integer">
+        SELECT count(*) FROM `t_member` where sex is not null  GROUP BY sex ORDER BY sex DESC
+    </select>
+
+    <!--根据条件查询-->
+    <select id="selectByCondition" parameterType="string" resultType="com.itheima.pojo.Member">
+        select * from t_member
+        <if test="value != null and value.length > 0">
+            where fileNumber = #{value} or phoneNumber = #{value} or name = #{value}
+        </if>
+    </select>
+      <!--删除会员-->
+    <delete id="deleteById" parameterType="int">
+        delete from t_member where id = #{id}
+    </delete>
+
+     <!--根据id查询会员-->
+    <select id="findById" parameterType="int" resultType="com.itheima.pojo.Member">
+        select * from t_member where id = #{id}
+    </select>
+
+      <!--根据日期统计会员数，统计指定日期之前的会员数-->
+    <select id="findMemberCountBeforeDate" parameterType="string" resultType="int">
+        select count(id) from t_member where regTime &lt;= #{value}
+    </select>
+</mapper>

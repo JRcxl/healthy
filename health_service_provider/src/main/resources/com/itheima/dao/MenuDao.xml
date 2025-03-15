@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itheima.dao.MenuDao">
+<!--    条件查询-->
+    <select id="findByCondition" resultType="com.itheima.pojo.Menu">
+       SELECT * FROM t_menu
+        <if test="value != null and value.length > 0 ">
+            WHERE id LIKE concat('%',#{value},'%') or name LIKE concat('%',#{value},'%')
+        </if>
+    </select>
+<!--    根据用户名查询该用户父菜单-->
+    <select id="findSideMenus" resultType="com.itheima.pojo.Menu">
+        SELECT DISTINCT m.*
+        FROM t_user u
+        JOIN t_user_role ur ON u.id = ur.user_id
+        JOIN t_role r ON r.id = ur.role_id
+        JOIN t_role_menu rm ON r.id = rm. role_id
+        JOIN t_menu m ON m.id = rm.menu_id
+        WHERE u.username = 'admin' AND m.parentMenuId IS NULL
+    </select>
+<!--    t通过父id查询子菜单-->
+    <select id="findChildrenByParentId" resultType="com.itheima.pojo.Menu" parameterType="int">
+        SELECT DISTINCT * FROM t_menu WHERE  parentMenuId =  #{parentMenuId}
+    </select>
+<!--    添加菜单-->
+    <insert id="add" parameterType="com.itheima.pojo.Menu">
+      INSERT INTO t_menu
+        (name,linkUrl,path,priority,icon,description,parentMenuId,`level`)
+         VALUES
+        (#{name},#{linkUrl},#{path},#{priority},#{icon},#{description},#{parentMenuId},#{level})
+    </insert>
+<!--    查询所有的菜单-->
+    <select id="findAllMenu" resultType="com.itheima.pojo.Menu">
+        select * from t_menu
+    </select>
+<!--    根据条件 null 查询自关联菜单id-->
+    <select id="findParent" resultType="com.itheima.pojo.Menu">
+        SELECT * FROM t_menu WHERE parentMenuId is null
+        <if test="value != null and value != '' and value.length > 0 ">
+            and name like concat('%',#{value},'%')
+        </if>
+    </select>
+<!--    删除菜单-->
+    <delete id="delete" parameterType="int">
+        delete from t_menu where id = #{id}
+    </delete>
+<!--    根据菜单id查询菜单信息-->
+    <select id="findById" resultType="com.itheima.pojo.Menu">
+        select * from t_menu where id = #{id}
+    </select>
+<!--    修改菜单数据-->
+    <update id="edit">
+        update t_menu
+        <set>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="linkUrl != null and linkUrl != ''">linkUrl = #{linkUrl},</if>
+            <if test="path != null and path != ''">path = #{path},</if>
+            <if test="priority != null">priority = #{priority},</if>
+            <if test="icon != null and icon != ''">icon = #{icon},</if>
+            <if test="description != null and description != ''">description = #{description},</if>
+            <if test="parentMenuId != null">parentMenuId = #{parentMenuId},</if>
+            <if test="level != null and level != ''">`level` = #{level},</if>
+        </set>
+        where id = #{id}
+    </update>
+</mapper>

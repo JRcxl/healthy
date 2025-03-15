@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itheima.dao.RoleDao">
+<!--    根据用户id查询角色-->
+    <select id="findRoleByUserId" resultType="com.itheima.pojo.Role">
+        SELECT r.* FROM  t_role r , t_user_role ur WHERE r.id = ur.role_id  and ur.user_id = #{user_id}
+    </select>
+<!--    条件查询-->
+    <select id="findByCondition" parameterType="String" resultType="com.itheima.pojo.Role">
+        select * from t_role
+        <if test="value != null and value.length > 0 ">
+            where id like concat('%',#{name},'%') or name like concat('%',#{name},'%')
+        </if>
+    </select>
+<!--    新增角色-->
+    <insert id="addRole" parameterType="com.itheima.pojo.Role" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+        insert  into  t_role
+        values (null,#{name},#{keyword},#{description})
+    </insert>
+<!--    添加角色和菜单之间的关系-->
+    <insert id="addRoleMenu" parameterType="int">
+        insert into  t_role_menu values (#{arg0},#{arg1})
+    </insert>
+<!--    添加角色和权限之间关系-->
+    <insert id="addRolePermission" parameterType="int">
+        insert into t_role_permission values (#{arg0},#{arg1})
+    </insert>
+<!--    根据角色id查询所有的菜单id-->
+    <select id="findMenuIdsByRoleId" resultType="int">
+        SELECT menu_id FROM t_role_menu WHERE role_id = #{role_id}
+    </select>
+<!--    根据角色id查询所有的权限id-->
+    <select id="findPermissionIdsByRoleId" resultType="int">
+        SELECT permission_id FROM t_role_permission WHERE role_id = #{role_id}
+    </select>
+<!--    修改角色-->
+    <update id="update" parameterType="com.itheima.pojo.Role">
+        update t_role
+        <set>
+            <if test="name != null and name != '' ">
+                name  = #{name},
+            </if>
+            <if test="keyword != null and keyword != '' ">
+                keyword = #{keyword},
+            </if>
+            <if test="description != null and description != '' ">
+                description = #{description},
+            </if>
+        </set>
+        where  id = #{id}
+    </update>
+<!--        删除菜单id 根据角色id-->
+    <delete id="deleteMenuIdByRoleId" parameterType="int">
+        DELETE  FROM t_role_menu WHERE role_id = #{role_id}
+    </delete>
+<!--    删除权限id  根据角色id-->
+    <delete id="deletePermissionIdByRoleId" parameterType="int">
+        DELETE  FROM t_role_permission WHERE role_id = #{role_id}
+    </delete>
+<!--    删除角色-->
+    <delete id="delete" parameterType="int">
+        DELETE FROM t_role where id = #{id}
+    </delete>
+<!--    根据角色id查询角色-->
+    <select id="findRoleByRoleId" parameterType="int" resultType="com.itheima.pojo.Role">
+        select * from t_role where id = #{id}
+    </select>
+<!--    查询所有的角色-->
+    <select id="findAll" resultType="com.itheima.pojo.Role">
+        select * from t_role
+    </select>
+</mapper>

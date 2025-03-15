@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                            http://www.springframework.org/schema/beans/spring-beans.xsd
+                            http://www.springframework.org/schema/mvc
+                            http://www.springframework.org/schema/mvc/spring-mvc.xsd
+                            http://code.alibabatech.com/schema/dubbo
+                            http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+                            http://www.springframework.org/schema/context
+                            http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!-- 指定应用名称 -->
+    <dubbo:application name="health_service_provider"/>
+    <!--指定暴露服务的端口，如果不指定默认为20880-->
+    <dubbo:protocol name="dubbo" port="20887"/>
+    <!--指定服务注册中心地址  <dubbo:registry address="zookeeper://192.168.1.3:2181"/>-->
+
+    <dubbo:registry address="zookeeper://localhost:2181"/>
+
+    <!--批量扫描，发布服务-->
+    <dubbo:annotation package="com.itheima.service"/>
+
+    <!--新增的config下的bean也要这里扫一下 不知道为什么没扫到-->
+    <context:component-scan base-package="com.itheima.config"></context:component-scan>
+    <context:component-scan base-package="com.itheima.Repository"></context:component-scan>
+
+
+
+    <!--freemarker 的配置    -->
+    <bean id="freemarkerConfig"
+          class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
+        <!--指定模板文件所在目录-->
+        <property name="templateLoaderPath" value="/WEB-INF/ftl/" />
+        <!--指定字符集-->
+        <property name="defaultEncoding" value="UTF-8" />
+    </bean>
+    <context:property-placeholder location="classpath:freemarker.properties"/>
+    <dubbo:reference id="baiduAIService" interface="com.itheima.service.BaiduAIService"
+                     timeout="30000" retries="0"/>
+
+    <!-- RocketMQ消费者 -->
+    <bean id="orderConsumer" class="org.apache.rocketmq.client.consumer.DefaultMQPushConsumer"
+          init-method="start" destroy-method="shutdown">
+        <property name="consumerGroup" value="order_consumer_group"/>
+        <property name="namesrvAddr" value="localhost:9876"/>
+        <property name="subscription">
+            <map>
+                <!-- 格式：key=主题, value=标签（* 表示所有标签） -->
+                <entry key="RESERVATION_TOPIC" value="*"/>
+            </map>
+        </property>
+        <property name="messageListener" ref="orderMessageListener"/>
+        <property name="allocateMessageQueueStrategy" ref="retryPolicy"/>
+        <property name="maxReconsumeTimes" value="3"/>
+        <property name="suspendCurrentQueueTimeMillis" value="5000"/>
+    </bean>
+
+    <!-- 消费者重试策略 -->
+    <bean id="retryPolicy" class="org.apache.rocketmq.client.consumer.rebalance.AllocateMessageQueueAveragely"/>
+
+
+    <bean id="reservationService" class="com.itheima.service.impl.ReservationServiceImpl"/>
+    <!-- 消费者监听器  -->
+    <bean id="orderMessageListener" class="com.itheima.ComsumerLisener.OrderConsumerListener">
+        <property name="reservationService" ref="reservationService"></property>
+    </bean>
+
+
+    <bean id="mqProducer" class="org.apache.rocketmq.client.producer.DefaultMQProducer"
+          init-method="start" destroy-method="shutdown">
+        <property name="producerGroup" value="reservation_group"/>
+        <property name="namesrvAddr" value="localhost:9876"/>
+        <property name="retryTimesWhenSendFailed" value="3"/>
+    </bean>
+
+
+
+</beans>

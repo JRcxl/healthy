@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itheima.dao.FoodSimilarityDao">
+
+
+    <select id="selectTopNSimilar" resultType="com.itheima.entity.FoodSimilarity">
+        SELECT *
+        FROM food_similarity
+        WHERE food_id1 = #{foodId}
+        ORDER BY similarity DESC
+            LIMIT #{topN}
+    </select>
+
+    <!-- FoodSimilarityMapper.xml -->
+    <insert id="batchInsert" parameterType="list">
+        INSERT INTO food_similarity (food_id1, food_id2, similarity)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.food_id1}, #{item.food_id2}, #{item.similarity})
+        </foreach>
+    </insert>
+
+
+    <delete id="deleteAll">
+        DELETE FROM food_similarity
+    </delete>
+
+    <!-- 查询总记录数 -->
+    <select id="countAll" resultType="int">
+        SELECT COUNT(*) FROM food_similarity
+    </select>
+
+
+</mapper>

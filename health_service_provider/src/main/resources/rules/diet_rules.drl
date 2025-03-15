@@ -1,0 +1,51 @@
+
+import com.itheima.entity.DietPlan;
+import com.itheima.entity.MemberProfile;
+import com.itheima.entity.Recipe;
+import com.itheima.entity.MedicalReport
+import java.util.stream.Collectors;
+import java.util.List
+import java.util.Set
+import java.util.HashSet
+
+global com.itheima.entity.DietPlan dietPlan;
+// 在规则文件头部声明自定义函数
+
+
+// 规则1：精确排除过敏食材
+rule "通过统计排除食谱"
+when
+    $mp: MemberProfile($allergies: allergies != null)
+    $recipe: Recipe($ingredientList: ingredients != null, $name: recipe_name)
+    // 统计过敏原在食材中的出现次数
+    exists( String(this memberOf $ingredientList) from $allergies )
+then
+    retract($recipe);
+    dietPlan.getWarnings().add("排除过敏食物: " + $name);
+end
+
+// 规则2：糖尿病饮食控制
+rule "Diabetes Control"
+    when
+        $user: MemberProfile(diseases contains "糖尿病")
+        $report: MedicalReport(bloodSugar > 7.0)
+    then
+        dietPlan.getWarnings().add("建议低糖饮食（血糖值: " + $report.getBloodSugar() + "）");
+end
+
+// 规则3：高血压饮食建议
+rule "Hypertension Advice"
+    when
+        $user: MemberProfile(diseases contains "高血压")
+        $report: MedicalReport(bloodPressure > 140)
+    then
+        dietPlan.getWarnings().add("建议低钠饮食（血压值: " + $report.getBloodPressure() + "）");
+end
+
+// 规则4：推荐健康食谱
+rule "Recommend Healthy Recipes"
+    when
+        $recipe: Recipe(calories < 500, sodium < 1000)
+    then
+        dietPlan.getRecommendedMeals().add($recipe);
+end

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itheima.dao.ExamDao">
+
+
+    <select id="findExamByids" resultType="String" parameterType="int">
+        SELECT result_data FROM member_exam_results WHERE member_id = #{memberid} and exam_package_id=#{mealid}
+    </select>
+
+
+    <select id="findAllExamDataByMember" resultType="com.itheima.pojo.ExamData" parameterType="int">
+        select distinct t_member.name as username,t_member.sex,t_setmeal.name as mealname,t_setmeal.id as mealid,t_order.orderDate,member_exam_results.result_data from
+            t_member
+                left join t_order on t_member.id=t_order.member_id
+                left join t_setmeal on t_order.setmeal_id=t_setmeal.id
+                left join member_exam_results on t_setmeal.id=member_exam_results.exam_package_id where t_member.id=#{memberid}
+    </select>
+
+
+
+</mapper>
